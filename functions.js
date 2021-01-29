@@ -7,9 +7,18 @@ const checkUnavailableField = (body) => {
 
     !body.hasOwnProperty('rule') && (unavalible.push('rule')) 
     !body.hasOwnProperty('data') && (unavalible.push('data'))
+
+    if (body.rule && Object.prototype.toString.call(body.rule) === '[object Object]') {
+        !body.rule.hasOwnProperty('field') && (unavalible.push('field')) 
+        !body.rule.hasOwnProperty('condition') && (unavalible.push('condition'))
+        !body.rule.hasOwnProperty('condition_value') && (unavalible.push('condition_value'))
+    }
     
     if (unavalible.length) {
-        throwError(`${unavalible.join(', ')} ${unavalible.length == 1 ? 'is' : 'are'} required.`, 'error', null, 400)
+        var text = unavalible.reduce((a, b, i) => {
+            return `${a}${i === (unavalible.length - 1) ? ' and' : ','} ${b}`
+        })
+        throwError(`${text} ${unavalible.length == 1 ? 'is' : 'are'} required.`, 'error', null, 400)
     }
 }
 
@@ -19,19 +28,7 @@ const checkWrongFieldType = (body) => {
     }
 
     if (Object.prototype.toString.call(body.data) !== '[object Object]' && typeof body.data !== 'string' && !Array.isArray(body.data)) {
-        throwError('data should be an object, a string, or an array.', 'error', null, 400)
-    }
-}
-
-const checkMissingRuleFields = (data) => {
-    let missingRuleFields = []
-
-    !data.hasOwnProperty('field') && (missingRuleFields.push('field')) 
-    !data.hasOwnProperty('condition') && (missingRuleFields.push('condition'))
-    !data.hasOwnProperty('condition_value') && (missingRuleFields.push('condition_value'))
-
-    if (missingRuleFields.length) {
-        throwError(`${missingRuleFields.join(', ')} ${missingRuleFields.length == 1 ? 'is' : 'are'} missing from the rule field.`, 'error', null, 400)
+        throwError('data should be an object, an array, or a string.', 'error', null, 400)
     }
 }
 
@@ -43,6 +40,5 @@ module.exports = {
     throwError,
     checkUnavailableField,
     checkWrongFieldType,
-    checkMissingRuleFields,
     checkMissingDataField
 }

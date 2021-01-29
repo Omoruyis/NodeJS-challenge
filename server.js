@@ -13,8 +13,7 @@ app.use(router)
 const port = process.env.PORT
 
 app.use((err, req, res, next) => {
-    console.log(err)
-    // check if an ivalid JSON is passed into the API 
+    // set response structure for invalid JSON passed into the API
     if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
         const error = {
             message: "Invalid JSON payload passed.",

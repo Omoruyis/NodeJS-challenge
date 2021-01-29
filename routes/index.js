@@ -1,5 +1,5 @@
 const { Router } = require('express')
-const { throwError, checkUnavailableField, checkWrongFieldType, checkMissingRuleFields, checkMissingDataField } = require('../helper')
+const { throwError, checkUnavailableField, checkWrongFieldType, checkMissingDataField } = require('../functions')
 const _ = require('lodash')
 
 const router = Router()
@@ -35,9 +35,6 @@ router.post('/validate-rule', (req, res, next) => {
         // check if a field is of the wrong type
         checkWrongFieldType(body)
 
-        // check if field(s) in the rule field is/are missing
-        checkMissingRuleFields(body.rule)
-
         // check if field specified in the rule object is missing from the data passed
         checkMissingDataField(body.data, body.rule.field)
 
@@ -58,8 +55,9 @@ router.post('/validate-rule', (req, res, next) => {
             result = null
         }
 
+        // unaccepted condition value
         if (result == null) {
-            throwError('please put a valid condition.', 'error', null, 400)
+            throwError(`${body.rule.condition} is not a valid condition`, 'error', null, 400)
         }
 
         const response = {
@@ -77,6 +75,7 @@ router.post('/validate-rule', (req, res, next) => {
         }
 
 
+        // send response
         res.status(result ? 200 : 400).send(response)
 
     } catch(e) {
